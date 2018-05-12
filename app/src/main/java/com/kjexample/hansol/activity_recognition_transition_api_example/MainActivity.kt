@@ -9,13 +9,13 @@ import com.google.android.gms.location.ActivityTransitionRequest
 import com.google.android.gms.location.DetectedActivity
 import android.content.Intent
 import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class MainActivity : AppCompatActivity() {
 
     val transitions = ArrayList<ActivityTransition>()
     lateinit var transitionPendingIntent: PendingIntent
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,20 +38,28 @@ class MainActivity : AppCompatActivity() {
                 .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
                 .build())
 
-        val request = ActivityTransitionRequest(transitions)
+        btn_reg.setOnClickListener {
+            val request = ActivityTransitionRequest(transitions)
+            val intent = Intent(this, ArtService::class.java)
+            transitionPendingIntent = PendingIntent.getService(this, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val task = ActivityRecognition.getClient(this).requestActivityTransitionUpdates(request, transitionPendingIntent)
+            task.addOnSuccessListener {
+                Toast.makeText(this, "reg success", Toast.LENGTH_LONG).show()
+            }
+            task.addOnFailureListener {
+                Toast.makeText(this, "reg fail", Toast.LENGTH_LONG).show()
+            }
 
-        val intent = Intent(this,ArtReceiver::class.java)
-        transitionPendingIntent = PendingIntent.getService(this, 100, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            btn_dereg.setOnClickListener {
 
-        val task = ActivityRecognition.getClient(this).requestActivityTransitionUpdates(request, transitionPendingIntent)
-
-        task.addOnSuccessListener {
-            Toast.makeText(this, "success", Toast.LENGTH_LONG).show()
+                val task = ActivityRecognition.getClient(this).removeActivityTransitionUpdates(transitionPendingIntent)
+                task.addOnSuccessListener {
+                    Toast.makeText(this, "dereg success", Toast.LENGTH_LONG).show()
+                }
+                task.addOnFailureListener {
+                    Toast.makeText(this, "dereg fail", Toast.LENGTH_LONG).show()
+                }
+            }
         }
-
-        task.addOnFailureListener {
-            Toast.makeText(this, "fail", Toast.LENGTH_LONG).show()
-        }
-
     }
 }

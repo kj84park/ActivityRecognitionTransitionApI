@@ -12,7 +12,7 @@ class ArtService : IntentService("ArtService") {
             val result = ActivityTransitionResult.extractResult(intent)
             result?.let {
                 for (event in it.transitionEvents) {
-                    Log.d(this.toString(), """####${event.toString()}""")
+                    Log.d(this.toString(), """#### 11111 ${event.toString()}""")
                 }
             }
         }
